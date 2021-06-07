@@ -48,6 +48,67 @@ const signup = async (req,res)=>{
   }
 }
 
+const login = async (req,res)=>{
+  const {email,password} = req.body
+
+  try {
+    const user = await user.findOne({email})
+    console.log(user)
+    // if user not found in DB
+    if(!user){
+      console.log(`${user} does not exist`)
+      return res.status(400).json({message:'User or password incorrect'})
+    } else {
+      // a user was found in DB
+      let isMatch = await bcrypt.compare(password)
+      console.log('Password correct', isMatch)
+
+      if (isMatch){
+        // add one to times logged in field
+        let logs = user.timesLoggedIn + 1
+        user.timesLoggedIn = logs
+        const savedUser = await user.save()
+        // Create a TOKEN PAYLOAD (object)
+        const payload={
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          expiredToken: Date.now()
+        }
+        try {
+          // token generated, expires in 1 hour/3600 seconds
+
+          let token = await jwt.sign(payload, JWT_SECRET, {expiresIn:3600})
+          console.log('Token', token)
+          let legit = await jwt.verify(token, JWT_SECRET, {expiresIn:60})
+
+          res.json({
+            success: true,
+            token: `Bearer ${token}`,
+            userData: legit
+          })
+        } catch (error) {
+          console.log('Error inside of isMatch conditional')
+          console.log(error)
+        return res.status(400).json({message:'Session has ended. Please login again.'})
+
+        }
+
+      } else {
+        return res.status(400).json({message:'Either email or password is incorrect'})
+      }
+
+    }
+
+  } catch (error){
+    console.log('Error inside of /api/users/login')
+    console.log(error)
+    return res.status(400).json({message:'Either email or password is incorrect'})
+    
+  }
+}
+
+
 // routes
 // GET -> /api/users/test which returns back a JSON object
 router.get('/test', test);
@@ -56,7 +117,7 @@ router.get('/test', test);
 router.post('/signup', signup);
 
 // POST api/users/login (Public)
-// router.post('/login', login);
+router.post('/login', login);
 
 // GET api/users/current (Private)
 // router.get('/profile', passport.authenticate('jwt', { session: false }), profile);
