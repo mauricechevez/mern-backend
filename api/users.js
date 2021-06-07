@@ -52,15 +52,16 @@ const login = async (req,res)=>{
   const {email,password} = req.body
 
   try {
-    const user = await user.findOne({email})
+    const user = await User.findOne({email})
     console.log(user)
+   
     // if user not found in DB
     if(!user){
       console.log(`${user} does not exist`)
       return res.status(400).json({message:'User or password incorrect'})
     } else {
       // a user was found in DB
-      let isMatch = await bcrypt.compare(password)
+      let isMatch = await bcrypt.compare(password, user.password)
       console.log('Password correct', isMatch)
 
       if (isMatch){
@@ -97,9 +98,7 @@ const login = async (req,res)=>{
       } else {
         return res.status(400).json({message:'Either email or password is incorrect'})
       }
-
     }
-
   } catch (error){
     console.log('Error inside of /api/users/login')
     console.log(error)
@@ -107,7 +106,6 @@ const login = async (req,res)=>{
     
   }
 }
-
 
 // routes
 // GET -> /api/users/test which returns back a JSON object
