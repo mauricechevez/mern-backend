@@ -1,5 +1,4 @@
 require('dotenv').config();
-const passport = require('passport');
 const {Strategy, ExtractJwt} = require('passport-jwt')
 
 // model, uses index.js by default
@@ -7,7 +6,7 @@ const {User} = require('../models/')
 
 // object made of strategy
 const options = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken,
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.JWT_SECRET
 }
 

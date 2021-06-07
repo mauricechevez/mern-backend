@@ -51,10 +51,35 @@ const create = async (req, res) => {
 }
 
 const update = async (req, res) => {
+  console.log(req.body)  
+  try {
+    // const book = await Book.findOne({title:req.body.title})
+    console.log()
+    const updatedBook = await Book.updateOne({title: req.body.title}, req.body)
+    const book = await Book.findOne({title: req.body.title})
+    console.log(updatedBook)
+    console.log(book)
+    res.redirect(`/api/books/${book.id}`)
     
+  } catch (error) {
+    console.log('Error inside of UPDATE route')
+    console.log(error)
+    return res.status(400).json({message:'Error updating book. Please try again'})
+  }
 }
 
 const deleteBook = async (req, res) => {
+  const { id } = req.params //:id
+  try {
+    console.log(id)
+    const result = await Book.findByIdAndRemove(id);
+    console.log(result)
+    res.redirect('/api/books')
+  } catch (error) {
+    console.log("Error inside DELETE route")
+    console.log(error)
+    return res.status(400).json({message:'Error deleting book. Please try again'})
+  }
     
 }
 
@@ -69,7 +94,9 @@ router.get('/', passport.authenticate('jwt', {session:false}), index);
 router.get('/:id', passport.authenticate('jwt', {session:false}), show);
 // POST -> /api/books
 router.post('/', passport.authenticate('jwt', {session:false}), create);
-// router.put('/books/:id', passport.authenticate('jwt', { session: false }), update);
-// router.delete('/books/:id', passport.authenticate('jwt', { session: false }), deleteBook);
+// PUT -> /api/books
+router.put('/', passport.authenticate('jwt', {session:false}), update);
+// DELETE -> /api/books/:id
+router.delete('/:id', passport.authenticate('jwt', { session: false }), deleteBook);
 
 module.exports = router;
