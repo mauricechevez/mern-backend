@@ -54,11 +54,10 @@ const update = async (req, res) => {
   console.log(req.body)  
   try {
     // const book = await Book.findOne({title:req.body.title})
-    console.log()
     const updatedBook = await Book.updateOne({title: req.body.title}, req.body)
     const book = await Book.findOne({title: req.body.title})
     console.log(updatedBook)
-    console.log(book)
+    // console.log(book)
     res.redirect(`/api/books/${book.id}`)
     
   } catch (error) {
@@ -82,7 +81,6 @@ const deleteBook = async (req, res) => {
   }
     
 }
-
 
 // GET api/books/test (Public)
 router.get('/test', (req, res) => {
